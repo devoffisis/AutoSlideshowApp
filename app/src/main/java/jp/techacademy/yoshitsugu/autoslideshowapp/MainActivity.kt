@@ -3,35 +3,94 @@ package jp.techacademy.yoshitsugu.autoslideshowapp
 import android.Manifest
 import android.content.ContentUris
 import android.content.pm.PackageManager
+import android.net.Uri
 import android.os.Build
 import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
+import android.os.Handler
 import android.provider.MediaStore
 import android.util.Log
+import android.widget.Button
 import android.widget.ImageView
+import android.widget.TextView
+import java.util.*
+import kotlin.math.abs
 
 class MainActivity : AppCompatActivity() {
     private val PERMISSIONS_REQUEST_CODE = 100
+
+    private var mTimer: Timer? = null
+    private var mTimerSec = 0.0
+    private var mHandler = Handler()
+
+    val imageUris = mutableListOf<Uri>()
+    private var imageNumber = 0
+    private var maxImageNumber = 0
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_main)
 
-        Log.d("DEBUG", "onCreate: before if Build.VERSION")
-
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
-            Log.d("2", "onCreate: TEST")
-            Log.d("3", checkSelfPermission(Manifest.permission.READ_EXTERNAL_STORAGE).toString())
-            Log.d("4", PackageManager.PERMISSION_GRANTED.toString())
             if (checkSelfPermission(Manifest.permission.READ_EXTERNAL_STORAGE) == PackageManager.PERMISSION_GRANTED) {
                 getContentsInfo()
             } else {
-                Log.d("5", "onCreate: TEST")
                 requestPermissions(arrayOf(Manifest.permission.READ_EXTERNAL_STORAGE), PERMISSIONS_REQUEST_CODE)
             }
-            // Android 5系以下の場合
         } else {
+            // Android 5系以下の場合
             getContentsInfo()
+        }
+
+        val timer = findViewById<TextView>(R.id.timer)
+        val nextButton = findViewById<Button>(R.id.nextButton)
+        val backButton = findViewById<Button>(R.id.backButton)
+        val playButton = findViewById<Button>(R.id.playButton)
+        val imageView = findViewById<ImageView>(R.id.imageView)
+
+        if (imageUris.isNotEmpty()) {
+            imageView.setImageURI(imageUris[0])
+            maxImageNumber = imageUris.size-1
+        }
+
+        nextButton.setOnClickListener{
+            imageNumber += 1
+            imageNumber = if (imageNumber == maxImageNumber) 0 else imageNumber
+            imageView.setImageURI(imageUris[imageNumber])
+        }
+        backButton.setOnClickListener{
+            imageNumber -= 1
+            imageNumber = if (imageNumber == -1) maxImageNumber else imageNumber
+            imageView.setImageURI(imageUris[imageNumber])
+        }
+        playButton.setOnClickListener{
+            mTimerSec = 0.0
+            var mImageSec = 0.1
+            val changeImageSec = 0.2
+            val error = 0.01
+            // timer.text = String.format("%.1f", mTimerSec)
+
+            if (mTimer == null){
+                mTimer = Timer()
+                mTimer!!.schedule(object: TimerTask(){
+                    override fun run (){
+                        mTimerSec += 0.1
+                        mImageSec += 0.1
+                        mHandler.post {
+                            timer.text = String.format("%.1f", mTimerSec)
+                        }
+                        if (abs(mImageSec - changeImageSec) < error) {
+                            imageNumber += 1
+                            imageNumber = if (imageNumber > maxImageNumber) 0 else imageNumber
+                            Log.d("DEBUG: imageNumber", imageNumber.toString())
+                            imageView.setImageURI(imageUris[imageNumber])
+                        }
+                    }
+                }, 100,100)
+            } else {
+                mTimer!!.cancel()
+                mTimer = null
+            }
         }
     }
 
@@ -45,8 +104,7 @@ class MainActivity : AppCompatActivity() {
         }
     }
     private fun getContentsInfo() {
-        val imageView = findViewById<ImageView>(R.id.imageView)
-
+        // val imageView = findViewById<ImageView>(R.id.imageView)
         // 画像の情報を取得する
         val resolver = contentResolver
         val cursor = resolver.query(
@@ -65,7 +123,8 @@ class MainActivity : AppCompatActivity() {
                 val imageUri = ContentUris.withAppendedId(MediaStore.Images.Media.EXTERNAL_CONTENT_URI, id)
 
                 Log.d("DEBUG: AutoSlideshowApp", "URI : " + imageUri.toString())
-                imageView.setImageURI(imageUri)
+                imageUris.add(imageUri)
+                // imageView.setImageURI(imageUri)
             } while (cursor.moveToNext())
         }
         cursor.close()
