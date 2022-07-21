@@ -10,44 +10,58 @@
 
     <ImageView
         android:id="@+id/imageView"
+        android:contentDescription="image"
         android:layout_width="377dp"
-        android:layout_height="400dp" />
+        android:layout_height="300dp" />
+
+    <EditText
+        android:id="@+id/changeImageSecText"
+        android:inputType="number"
+        android:autofillHints="number"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_alignParentTop="true"
+        android:layout_marginLeft="10dp"
+        android:layout_marginTop="321dp"
+        android:text="2.0"
+        android:textSize="20sp" />
 
     <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:layout_marginTop="20dp"
         android:layout_below="@id/imageView"
+        android:layout_marginTop="60dp"
         android:gravity="center">
 
         <Button
+            android:id="@+id/nextButton"
             android:layout_width="120dp"
             android:layout_height="wrap_content"
-            android:text="進む"
-            android:id="@+id/nextButton"/>
+            android:text="進む" />
 
         <Button
+            android:id="@+id/backButton"
             android:layout_width="120dp"
             android:layout_height="wrap_content"
-            android:text="戻る"
-            android:id="@+id/backButton"/>
+            android:text="戻る" />
 
         <Button
+            android:id="@+id/playButton"
             android:layout_width="120dp"
             android:layout_height="wrap_content"
-            android:text="再生／停止"
-            android:id="@+id/playButton"/>
+            android:text="再生／停止" />
     </LinearLayout>
 
     <TextView
         android:id="@+id/timer"
-        android:textSize="60sp"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:text="0.0"
-        android:layout_marginLeft="20dp"
-        android:layout_marginRight="20dp"
-        android:layout_marginTop="500dp"
         android:layout_alignParentTop="true"
-        android:layout_centerHorizontal="true" />
+        android:layout_centerHorizontal="true"
+        android:layout_marginLeft="20dp"
+        android:layout_marginTop="500dp"
+        android:layout_marginRight="20dp"
+        android:text="0.0"
+        android:textSize="60sp" />
+
 </RelativeLayout>

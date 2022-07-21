@@ -11,6 +11,7 @@ import android.os.Handler
 import android.provider.MediaStore
 import android.util.Log
 import android.widget.Button
+import android.widget.EditText
 import android.widget.ImageView
 import android.widget.TextView
 import java.util.*
@@ -47,6 +48,7 @@ class MainActivity : AppCompatActivity() {
         val backButton = findViewById<Button>(R.id.backButton)
         val playButton = findViewById<Button>(R.id.playButton)
         val imageView = findViewById<ImageView>(R.id.imageView)
+        // val changeImageSecText = findViewById<EditText>(R.id.changeImageSecText)
 
         if (imageUris.isNotEmpty()) {
             imageView.setImageURI(imageUris[0])
@@ -55,7 +57,7 @@ class MainActivity : AppCompatActivity() {
 
         nextButton.setOnClickListener{
             imageNumber += 1
-            imageNumber = if (imageNumber == maxImageNumber) 0 else imageNumber
+            imageNumber = if (imageNumber > maxImageNumber) 0 else imageNumber
             imageView.setImageURI(imageUris[imageNumber])
         }
         backButton.setOnClickListener{
@@ -66,30 +68,36 @@ class MainActivity : AppCompatActivity() {
         playButton.setOnClickListener{
             mTimerSec = 0.0
             var mImageSec = 0.1
-            val changeImageSec = 0.2
-            val error = 0.01
-            // timer.text = String.format("%.1f", mTimerSec)
+            val changeImageSec = 2.0
+            val error = mImageSec
 
             if (mTimer == null){
+                nextButton.isClickable = false
+                backButton.isClickable = false
                 mTimer = Timer()
                 mTimer!!.schedule(object: TimerTask(){
                     override fun run (){
+                        // val changeImageSec = changeImageSecText.text.toString().toFloat()
                         mTimerSec += 0.1
                         mImageSec += 0.1
                         mHandler.post {
                             timer.text = String.format("%.1f", mTimerSec)
-                        }
-                        if (abs(mImageSec - changeImageSec) < error) {
-                            imageNumber += 1
-                            imageNumber = if (imageNumber > maxImageNumber) 0 else imageNumber
-                            Log.d("DEBUG: imageNumber", imageNumber.toString())
-                            imageView.setImageURI(imageUris[imageNumber])
+                            // Log.d("DEBUG!!!!!", abs(mImageSec.mod(changeImageSec)).toString())
+                            if (abs(mImageSec.mod(changeImageSec)) < error) {
+                                imageNumber += 1
+                                imageNumber = if (imageNumber > maxImageNumber) 0 else imageNumber
+                                Log.d("DEBUG: imageNumber", imageNumber.toString())
+                                imageView.setImageURI(imageUris[imageNumber])
+                                // imageView.setImageURI(imageUris[imageNumber])
+                            }
                         }
                     }
                 }, 100,100)
             } else {
                 mTimer!!.cancel()
                 mTimer = null
+                nextButton.isClickable = true
+                backButton.isClickable = true
             }
         }
     }
